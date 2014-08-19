@@ -1,0 +1,131 @@
+#!/usr/bin/env python                                                                                                                                                             
+
+
+"""Model to test PGS API"""
+
+import requests
+import json
+
+
+__author__    = "Antonio Carella"
+__email__    = "carellarafaelantonio@gmail.com"
+__status__ = "Development"
+__version__ = 0.1
+
+#Global variables                                                                                                                                                                 
+
+base_url = "https://localhost:8443/mifosng-provider/api/v1/"
+headers = {"X-Mifos-Platform-TenantId":"default", "Content-Type":"application/json", "Authorization":"Basic bWlmb3M6cGFzc3dvcmQ=" }
+results = {}
+
+#Testing PGS Client POST                                                                                                                                                          
+pgsclient_url = "pgsclients"
+payload = "{\"officeId\":1,\"firstname\":\"testy\",\"lastname\":\"tester\",\"locale\":\"en\",\"active\":true,\"dateFormat\":\"dd MMMM yyyy\",\"activationDate\":\"31 July 2014\",\
+\"savingsProductId\":null}"
+r = requests.post(base_url+pgsclient_url, data = payload, headers = headers, verify=False)
+r_json = json.loads(r.text)
+client_id = r_json['clientId']
+results['PGSClient POST'] = [str(r.status_code), r.text]
+
+#Testing PGS Client PUT                                                                                                                                                           
+payload = "{\"mobileNo\":\"123456789\"}"
+r = requests.put(base_url+pgsclient_url + '/' + str(client_id), data = payload, headers = headers, verify=False)
+results['PGSClient PUT'] = [str(r.status_code), r.text]
+
+#Testing PGS Client GET                                                                                                                                                           
+r = requests.get(base_url + pgsclient_url + '/'+ str(client_id),headers = headers, verify=False)
+results['PGSClient GET'] = [str(r.status_code), r.text]
+r_json = json.loads(r.text)
+service_account_id = r_json['serviceAccountId']
+
+#Testing Service Account GET                                                                                                                                                      
+service_account_url = base_url + "serviceaccount/" + str(service_account_id) 
+r = requests.get(service_account_url, headers = headers, verify=False)
+results['ServiceAccount GET'] = [str(r.status_code), r.text]
+
+#Testing Service Account PUT                                                                                                                                                      
+payload = "{\"amount\":\"5.0\"}"
+r = requests.put(service_account_url, data = payload, headers = headers, verify=False)
+results['ServiceAccount PUT'] = [str(r.status_code), r.text]
+
+#Testing Current Account Information GET                                                                                                                                          
+current_account_information_url = service_account_url + "/currentaccountinformation/"
+r = requests.get(current_account_information_url, headers = headers, verify=False)
+results['CurrentAccountInformation GET'] = [str(r.status_code), r.text]
+current_account_id = r_json['id']
+
+#Testing Current Account Information PUT                                                                                                                                          
+payload = "{\"balance\":\"5.0\"}"
+r = requests.get(current_account_information_url, data = payload, headers = headers, verify=False)
+results['CurrentAccountInformation PUT'] = [str(r.status_code), r.text]
+
+#Testing Service Offering GET                                                                                                                                                     
+service_offering_url = service_account_url + "/serviceoffering/"
+r = requests.get(service_offering_url, headers = headers, verify=False)
+results['ServiceOffering GET'] = [str(r.status_code), r.text]
+
+#Testing Service Offering PUT                                                                                                                                                     
+payload = "{\"description\":\"Updated description\"}"
+r = requests.put(service_offering_url, data = payload, headers = headers, verify=False)
+results['ServiceOffering PUT'] = [str(r.status_code), r.text]
+
+#base_service_account_url = base_url + "serviceaccount/51/" 
+transaction_record_url = service_account_url + "/transactionrecord/"
+
+#Testing Transaction Record POST
+payload = "{\"date\" : \"09 09 2010\", \"dateFormat\" : \"mm dd yyyy\", \"locale\" : \"en\",\"description\" : \"Transaction record testing.\", \"transactionType\" : 100, \"amount\" : 234.432}"
+r = requests.post(transaction_record_url, data = payload, headers = headers, verify=False)
+r_json = json.loads(r.text)
+results['Transaction Record POST'] = [str(r.status_code), r.text]
+transaction_record_id = r_json['resourceId']
+
+#Testing Transaction Record GET                                                                                                                                          
+r = requests.get(transaction_record_url + str(transaction_record_id), headers = headers, verify=False)
+results['Transaction Record GET'] = [str(r.status_code), r.text]
+
+#Testing Transaction Record PUT                                                                                                                                          
+payload = "{\"balance\":\"5.0\"}"
+r = requests.get(transaction_record_url, data = payload, headers = headers, verify=False)
+results['Transaction Record PUT'] = [str(r.status_code), r.text]
+
+usage_record_url = service_account_url + "/usagerecord/"
+#Testing Usage Record POST
+payload = "{\"dateFormat\" : \"mm dd yyyy\", \"locale\" : \"en\", \"date\":\"09 10 2010\", \"numberOfUnits\" : 5.5, \"startDate\":\"06 04 2014\", \"endDate\":\"06 10 2014\", \"metricType\" : 100}"
+r = requests.post(usage_record_url, data = payload, headers = headers, verify=False)
+r_json = json.loads(r.text)
+results['Usage Record POST'] = [str(r.status_code), r.text]
+usage_record_id = r_json['resourceId']
+
+#Testing Usage Record GET                                                                                                                                          
+r = requests.get(usage_record_url + str(usage_record_id), headers = headers, verify=False)
+results['Usage Record GET'] = [str(r.status_code), r.text]
+
+#Testing Usage Record PUT                                                                                                                                          
+payload = "{\"numberOfUnits\" : 10.5}"
+r = requests.get(usage_record_url + str(usage_record_id), data = payload, headers = headers, verify=False)
+results['Usage Record PUT'] = [str(r.status_code), r.text]
+
+service_account_status_history_url = service_account_url + "/serviceaccountstatushistory/"
+#Testing Usage Record POST
+payload = "{\"dateFormat\" : \"mm dd yyyy\", \"locale\" : \"en\", \"date\":\"09 09 2010\", \"change\":100}"
+r = requests.post(service_account_status_history_url, data = payload, headers = headers, verify=False)
+r_json = json.loads(r.text)
+results['Usage Record POST'] = [str(r.status_code), r.text]
+service_account_status_history_id = r_json['resourceId']
+
+#Testing Usage Record GET                                                                                                                                          
+r = requests.get(service_account_status_history_url + str(service_account_status_history_id), headers = headers, verify=False)
+results['Usage Record GET'] = [str(r.status_code), r.text]
+
+#Testing Usage Record PUT                                                                                                                                          
+payload = "{\"change\":0}"
+r = requests.get(service_account_status_history_url + str(service_account_status_history_id), data = payload, headers = headers, verify=False)
+results['Usage Record PUT'] = [str(r.status_code), r.text]
+
+for result in results:
+    if results[result][0] == '200':
+        print result + " OK"
+    else:
+        print result
+        print results[result]
+
